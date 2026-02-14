@@ -56,7 +56,7 @@ class DataLoader:
                              req_start: pd.Timestamp,
                              req_end : pd.Timestamp):
         pass
-        
+    
 
     def _load_from_cache(
             self,
@@ -158,4 +158,5 @@ if __name__ == "__main__":
     result = dataloader.fetch_single_ticker('AAPL', 'Close', ("2024-01-01", "2024-01-10"))
     print(result)
     pass
-
+if __hehe__ == "__main__" :
+    pass
