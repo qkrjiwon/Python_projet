@@ -12,8 +12,8 @@ from typing import Dict
 
 
 # ─────────────────────────────────────────────
-# 카테고리별 고정 색상
-# 일관된 색상으로 사용자가 카테고리를 쉽게 구분
+# Couleurs fixes par catégorie
+# Permet à l'utilisateur d'identifier rapidement les catégories
 # ─────────────────────────────────────────────
 CATEGORY_COLORS = {
     "Loyer":          "#FF6B6B",
@@ -31,16 +31,16 @@ CATEGORY_COLORS = {
 class Visualizer:
 
     # ─────────────────────────────────────────────
-    # 1. 원형 차트 (Diagramme circulaire)
-    # 카테고리별 지출 비율을 시각화
+    # 1. Diagramme Circulaire (Pie Chart)
+    # Visualisation de la répartition des dépenses par catégorie
     # ─────────────────────────────────────────────
     def plot_pie_chart(self, category_ratios: pd.DataFrame,
                        title: str = "Répartition des dépenses") -> go.Figure:
         """
-        카테고리별 지출 비율 원형 차트 생성
+        Génère un diagramme circulaire des ratios de dépenses par catégorie.
 
         Args:
-            category_ratios : DataFrame with ['catégorie', 'total', 'pourcentage']
+            category_ratios : DataFrame avec ['catégorie', 'total', 'pourcentage']
         """
         colors = [
             CATEGORY_COLORS.get(cat, "#BDC3C7")
@@ -50,7 +50,7 @@ class Visualizer:
         fig = go.Figure(data=[go.Pie(
             labels=category_ratios['catégorie'],
             values=category_ratios['total'],
-            hole=0.4,           # 도넛 형태로 더 보기 좋게
+            hole=0.4,           # Forme de donut pour un look plus moderne
             marker=dict(colors=colors, line=dict(color='white', width=2)),
             textinfo='label+percent',
             hovertemplate=(
@@ -72,16 +72,16 @@ class Visualizer:
         return fig
 
     # ─────────────────────────────────────────────
-    # 2. 선형 그래프 (Tendances par catégorie)
-    # 월별 카테고리 지출 추이를 선으로 표시
+    # 2. Graphique Linéaire (Tendances par catégorie)
+    # Affiche l'évolution mensuelle des dépenses par catégorie
     # ─────────────────────────────────────────────
     def plot_trend_lines(self, by_month_category: pd.DataFrame,
                           title: str = "Tendances des dépenses par catégorie") -> go.Figure:
         """
-        카테고리별 월별 지출 추이 선형 그래프
+        Génère un graphique linéaire de l'évolution mensuelle des dépenses.
 
         Args:
-            by_month_category : DataFrame with ['mois', 'catégorie', 'total']
+            by_month_category : DataFrame avec ['mois', 'catégorie', 'total']
         """
         fig = go.Figure()
 
@@ -97,7 +97,7 @@ class Visualizer:
             fig.add_trace(go.Scatter(
                 x=cat_data['mois'].astype(str),
                 y=cat_data['total'],
-                mode='lines+markers',       # 선 + 마커 포인트
+                mode='lines+markers',       # Lignes + points de repère
                 name=category,
                 line=dict(color=color, width=2.5),
                 marker=dict(
@@ -129,17 +129,17 @@ class Visualizer:
         return fig
 
     # ─────────────────────────────────────────────
-    # 3. 막대 그래프 (Budget vs Réel)
-    # 예산과 실제 지출을 나란히 비교
+    # 3. Histogramme (Budget vs Réel)
+    # Compare le budget prévu et les dépenses réelles côte à côte
     # ─────────────────────────────────────────────
     def plot_budget_comparison(self, budget_eval: pd.DataFrame,
                                 title: str = "Budget vs Dépenses réelles") -> go.Figure:
         """
-        예산 대비 실제 지출 비교 막대 그래프
+        Génère un graphique à barres comparant le budget et le réel.
         """
         fig = go.Figure()
 
-        # 예산 막대
+        # Barres Budget
         fig.add_trace(go.Bar(
             name='Budget',
             x=budget_eval['catégorie'],
@@ -149,15 +149,15 @@ class Visualizer:
             hovertemplate="Budget: %{y:.2f}€<extra></extra>"
         ))
 
-        # 실제 지출 막대
+        # Barres Réel
         fig.add_trace(go.Bar(
             name='Réel',
             x=budget_eval['catégorie'],
             y=budget_eval['réel (€)'],
             marker_color=[
-                'rgba(255, 99, 99, 0.8)'   # 초과 시 빨간색
+                'rgba(255, 99, 99, 0.8)'   # Rouge en cas de dépassement
                 if row['différence (€)'] < 0
-                else 'rgba(80, 200, 120, 0.8)'  # 절약 시 초록색
+                else 'rgba(80, 200, 120, 0.8)'  # Vert en cas d'économie
                 for _, row in budget_eval.iterrows()
             ],
             marker_line=dict(color='white', width=1),
@@ -178,24 +178,24 @@ class Visualizer:
         return fig
 
     # ─────────────────────────────────────────────
-    # 4. 저축 진행률 게이지 차트
-    # 목표 대비 현재 저축 달성률 시각화
+    # 4. Jauge de progression de l'épargne (Gauge Chart)
+    # Visualise le taux d'atteinte de l'objectif d'épargne
     # ─────────────────────────────────────────────
     def plot_savings_gauge(self, savings_data: dict) -> go.Figure:
         """
-        저축 목표 달성률 게이지 차트
+        Génère un graphique de jauge pour l'objectif d'épargne.
         """
         pct = savings_data['progress_pct']
         total_saved = savings_data['total_saved']
         goal = savings_data['goal']
 
-        # 달성률에 따라 색상 변경
+        # Changement de couleur selon le taux de réussite
         if pct >= 100:
-            color = "#2ECC71"   # 초록 (목표 달성)
+            color = "#2ECC71"   # Vert (Objectif atteint)
         elif pct >= 60:
-            color = "#F39C12"   # 주황 (진행 중)
+            color = "#F39C12"   # Orange (En cours)
         else:
-            color = "#E74C3C"   # 빨강 (부족)
+            color = "#E74C3C"   # Rouge (Insuffisant)
 
         fig = go.Figure(go.Indicator(
             mode="gauge+number+delta",
@@ -229,16 +229,17 @@ class Visualizer:
         return fig
 
     # ─────────────────────────────────────────────
-    # 5. 월별 저축 누적 영역 차트
+    # 5. Graphique d'aire cumulée (Évolution de l'épargne)
+    # Visualisation de la croissance de l'épargne mois par mois
     # ─────────────────────────────────────────────
     def plot_cumulative_savings(self, savings_df: pd.DataFrame) -> go.Figure:
 
         """
-        월별 누적 저축 추이 영역 차트
+        Génère un graphique d'aire montrant l'évolution cumulée de l'épargne.
         """
         fig = go.Figure()
 
-        # 누적 저축 영역
+        # Zone d'épargne cumulée
         fig.add_trace(go.Scatter(
             x=savings_df['mois'],
             y=savings_df['épargne_cumulée'],
@@ -250,7 +251,7 @@ class Visualizer:
             hovertemplate="Mois: %{x}<br>Épargne cumulée: %{y:.2f}€<extra></extra>"
         ))
 
-        # 월별 저축 막대
+        # Barres d'épargne mensuelle
         fig.add_trace(go.Bar(
             x=savings_df['mois'],
             y=savings_df['épargne_mois'],
