@@ -158,5 +158,3 @@ if __name__ == "__main__":
     result = dataloader.fetch_single_ticker('AAPL', 'Close', ("2024-01-01", "2024-01-10"))
     print(result)
     pass
-if __hehe__ == "__main__" :
-    pass
