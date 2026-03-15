@@ -15,7 +15,7 @@ from report_generator import ReportGenerator
 
 
 # ─────────────────────────────────────────────
-# 카테고리 목록 (예산 설정에 사용)
+# Liste des catégories (utilisées pour le budget)
 # ─────────────────────────────────────────────
 CATEGORIES = [
     "Loyer", "Alimentation", "Transport",
@@ -26,11 +26,11 @@ CATEGORIES = [
 
 def run_app():
     """
-    Streamlit 앱 메인 함수
-    모든 UI 구성 요소를 순서대로 렌더링
+    Fonction principale de l'application Streamlit.
+    Rendu de tous les composants de l'interface dans l'ordre.
     """
 
-    # ── 페이지 기본 설정 ──
+    # ── Configuration de base de la page ──
     st.set_page_config(
         page_title="Gestionnaire Financier",
         page_icon="💰",
@@ -38,7 +38,7 @@ def run_app():
         initial_sidebar_state="expanded"
     )
 
-    # ── 커스텀 CSS ──
+    # ── CSS Personnalisé ──
     st.markdown("""
         <style>
             .main-title {
@@ -71,7 +71,7 @@ def run_app():
         </style>
     """, unsafe_allow_html=True)
 
-    # ── 헤더 ──
+    # ── En-tête ──
     st.markdown(
         '<div class="main-title">💰 Gestionnaire de Dépenses Personnelles</div>',
         unsafe_allow_html=True
@@ -82,15 +82,13 @@ def run_app():
     )
 
     # ─────────────────────────────────────────────
-    # 사이드바 : 파일 업로드 + 예산 설정
-    # 사이드바를 사용하는 이유 :
-    # 설정 항목들을 메인 화면과 분리하여
-    # 분석 결과에 집중할 수 있도록 함
+    # Barre latérale : Import de fichier + Paramètres budget
+    # Séparé du contenu principal pour plus de clarté
     # ─────────────────────────────────────────────
     with st.sidebar:
         st.header("⚙️ Configuration")
 
-        # ── 1. 파일 업로드 ──
+        # ── 1. Importation de fichier ──
         st.subheader("📁 Importer un relevé bancaire")
         uploaded_file = st.file_uploader(
             "Choisissez un fichier CSV ou Excel",
@@ -98,7 +96,7 @@ def run_app():
             help="Formats supportés : CSV (séparateur ; ou ,) et Excel"
         )
 
-        # 샘플 파일 다운로드 버튼
+        # Bouton de téléchargement du fichier exemple
         sample_csv = _generate_sample_csv()
         st.download_button(
             label="📥 Télécharger un fichier exemple",
@@ -110,7 +108,7 @@ def run_app():
 
         st.markdown("---")
 
-        # ── 2. 컬럼 매핑 ──
+        # ── 2. Correspondance des colonnes ──
         st.subheader("🗂️ Correspondance des colonnes")
         st.caption("Indiquez quelles colonnes correspondent à quoi")
 
@@ -129,7 +127,7 @@ def run_app():
 
         st.markdown("---")
 
-        # ── 3. 예산 설정 ──
+        # ── 3. Paramètres du budget ──
         st.subheader("💶 Définir votre budget mensuel")
 
         savings_goal = st.number_input(
@@ -147,10 +145,10 @@ def run_app():
 
         st.caption("Budget mensuel par catégorie (€)")
 
-        # 카테고리별 예산 입력
+        # Saisie du budget par catégorie
         category_budgets = {}
         for cat in CATEGORIES:
-            # 카테고리별 기본값 설정
+            # Valeurs par défaut
             default_values = {
                 "Loyer": 800.0,
                 "Alimentation": 400.0,
@@ -178,15 +176,15 @@ def run_app():
         )
 
     # ─────────────────────────────────────────────
-    # 메인 화면 : 파일이 업로드된 경우에만 표시
+    # Écran principal : S'affiche uniquement si un fichier est importé
     # ─────────────────────────────────────────────
     if uploaded_file is None:
-        # 파일 미업로드 시 안내 화면
+        # Écran d'accueil si pas de fichier
         _show_welcome_screen()
         return
 
-    # ── 데이터 처리 ──
-    # st.session_state를 사용하여 재실행 시 재처리 방지
+    # ── Traitement des données ──
+    # Utilisation de session_state pour éviter de retraiter à chaque interaction
     if 'processed_data' not in st.session_state or \
        st.session_state.get('file_name') != uploaded_file.name:
 
@@ -194,10 +192,10 @@ def run_app():
             try:
                 processor = DataProcessor()
 
-                # 파일 로드
+                # Chargement du fichier
                 raw_df = processor.load_file(uploaded_file)
 
-                # 컬럼 정규화
+                # Normalisation des colonnes
                 df = processor.normalize_columns(
                     raw_df,
                     date_col=col_date,
@@ -205,13 +203,13 @@ def run_app():
                     label_col=col_label
                 )
 
-                # 카테고리 분류
+                # Classification des catégories
                 df = processor.categorize_transactions(df)
 
-                # 월별 통계 계산
+                # Calcul des statistiques mensuelles
                 monthly_stats = processor.compute_monthly_stats(df)
 
-                # 세션에 저장
+                # Sauvegarde en session
                 st.session_state['processed_data'] = df
                 st.session_state['monthly_stats'] = monthly_stats
                 st.session_state['file_name'] = uploaded_file.name
@@ -224,25 +222,22 @@ def run_app():
                 st.error(f"❌ Erreur lors du traitement : {str(e)}")
                 st.stop()
 
-    # ── 세션에서 데이터 불러오기 ──
+    # ── Récupération des données depuis la session ──
     df = st.session_state['processed_data']
     monthly_stats = st.session_state['monthly_stats']
 
-    # ── 모듈 초기화 ──
+    # ── Initialisation des modules ──
     budget_manager = BudgetManager()
     visualizer = Visualizer()
     report_gen = ReportGenerator()
     processor = DataProcessor()
     processor.clean_data = df
 
-    # 예산 설정
+    # Configuration du budget
     budget_manager.set_budget(category_budgets, savings_goal)
 
     # ─────────────────────────────────────────────
-    # 탭 구성
-    # 탭을 사용하는 이유 :
-    # 많은 정보를 한 화면에 깔끔하게 정리
-    # 사용자가 원하는 섹션으로 바로 이동 가능
+    # Organisation des onglets (Tabs)
     # ─────────────────────────────────────────────
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Vue d'ensemble",
@@ -253,12 +248,12 @@ def run_app():
     ])
 
     # ════════════════════════════════════════════
-    # TAB 1 : 전체 개요
+    # TAB 1 : VUE D'ENSEMBLE
     # ════════════════════════════════════════════
     with tab1:
         st.subheader("📊 Vue d'ensemble des dépenses")
 
-        # ── 월 선택 필터 ──
+        # ── Filtre de sélection du mois ──
         available_months = df['mois_label'].unique().tolist()
         selected_month = st.selectbox(
             "🗓️ Sélectionner un mois",
@@ -269,15 +264,15 @@ def run_app():
         month_filter = None if selected_month == "Tous les mois" \
             else selected_month
 
-        # ── 카테고리 비율 계산 ──
+        # ── Calcul de la répartition par catégorie ──
         category_ratios = processor.compute_category_ratios(
             df, selected_month=month_filter
         )
 
-        # ── 핵심 지표 카드 (상단 3개) ──
+        # ── Indicateurs clés (Top 3) ──
         col1, col2, col3 = st.columns(3)
 
-        # 총 지출
+        # Total dépenses
         total_expenses = df[df['est_dépense']]['montant_abs'].sum()
         with col1:
             st.metric(
@@ -286,7 +281,7 @@ def run_app():
                 help="Total de toutes les dépenses sur la période"
             )
 
-        # 월 평균 지출
+        # Moyenne mensuelle
         avg_monthly = monthly_stats['avg_monthly_total']
         with col2:
             st.metric(
@@ -295,7 +290,7 @@ def run_app():
                 help="Moyenne des dépenses par mois"
             )
 
-        # 가장 큰 지출 카테고리
+        # Catégorie principale (plus grosse dépense)
         top_category = category_ratios.iloc[0]['catégorie'] \
             if not category_ratios.empty else "N/A"
         top_amount = category_ratios.iloc[0]['total'] \
@@ -311,7 +306,7 @@ def run_app():
         st.markdown('<div class="section-divider"></div>',
                     unsafe_allow_html=True)
 
-        # ── 원형 차트 + 카테고리 테이블 ──
+        # ── Graphique Circulaire + Table des catégories ──
         col_left, col_right = st.columns([1.2, 0.8])
 
         with col_left:
@@ -322,7 +317,7 @@ def run_app():
 
         with col_right:
             st.subheader("📋 Détail par catégorie")
-            # 테이블 표시 (인덱스 숨김)
+            # Affichage du tableau (sans index)
             display_df = category_ratios[
                 ['catégorie', 'total', 'pourcentage']
             ].copy()
@@ -340,9 +335,9 @@ def run_app():
         st.markdown('<div class="section-divider"></div>',
                     unsafe_allow_html=True)
 
-        # ── 거래 내역 테이블 ──
+        # ── Table des transactions ──
         with st.expander("🔍 Voir toutes les transactions", expanded=False):
-            # 카테고리 수동 수정 기능
+            # Fonction de modification manuelle des catégories
             st.caption(
                 "💡 Vous pouvez modifier manuellement les catégories"
             )
@@ -353,7 +348,7 @@ def run_app():
             display_transactions['date'] = \
                 display_transactions['date'].dt.strftime('%d/%m/%Y')
 
-            # 카테고리 편집 가능한 데이터프레임
+            # Éditeur de données pour modifier les catégories en direct
             edited_df = st.data_editor(
                 display_transactions,
                 column_config={
@@ -373,7 +368,7 @@ def run_app():
                 use_container_width=True
             )
 
-            # 수정된 카테고리 반영
+            # Application des modifications
             if st.button("✅ Appliquer les modifications"):
                 df['catégorie'] = edited_df['catégorie'].values
                 st.session_state['processed_data'] = df
@@ -381,20 +376,20 @@ def run_app():
                 st.rerun()
 
     # ════════════════════════════════════════════
-    # TAB 2 : 예산 관리
+    # TAB 2 : GESTION DU BUDGET
     # ════════════════════════════════════════════
     with tab2:
         st.subheader("💶 Évaluation du Budget Mensuel")
 
-        # 월 선택
+        # Sélection du mois
         selected_month_budget = st.selectbox(
             "🗓️ Choisir le mois à évaluer",
             options=available_months,
-            index=len(available_months) - 1,  # 기본값 : 가장 최근 월
+            index=len(available_months) - 1,  # Par défaut : le mois le plus récent
             key="budget_month_select"
         )
 
-        # 선택된 월의 실제 지출 계산
+        # Calcul des dépenses réelles pour le mois choisi
         month_expenses = df[
             (df['est_dépense']) &
             (df['mois_label'] == selected_month_budget)
@@ -407,13 +402,13 @@ def run_app():
             .to_dict()
         )
 
-        # 예산 평가
+        # Évaluation budgétaire
         budget_eval = budget_manager.evaluate_budget(
             actual_by_category,
             month_label=selected_month_budget
         )
 
-        # ── 요약 지표 ──
+        # ── Indicateurs de résumé ──
         col1, col2, col3 = st.columns(3)
 
         total_budget = sum(category_budgets.values())
@@ -444,14 +439,14 @@ def run_app():
         st.markdown('<div class="section-divider"></div>',
                     unsafe_allow_html=True)
 
-        # ── 예산 비교 차트 ──
+        # ── Graphique de comparaison budget ──
         fig_budget = visualizer.plot_budget_comparison(
             budget_eval,
             title=f"Budget vs Réel - {selected_month_budget}"
         )
         st.plotly_chart(fig_budget, use_container_width=True)
 
-        # ── 예산 평가 테이블 ──
+        # ── Tableau d'évaluation détaillée ──
         st.subheader("📋 Détail par catégorie")
         st.dataframe(
             budget_eval,
@@ -473,17 +468,17 @@ def run_app():
         )
 
     # ════════════════════════════════════════════
-    # TAB 3 : 저축 추적
+    # TAB 3 : SUIVI DE L'ÉPARGNE
     # ════════════════════════════════════════════
     with tab3:
         st.subheader("🏦 Suivi de l'Épargne")
 
-        # 저축 진행 계산
+        # Calcul de la progression de l'épargne
         savings_data = budget_manager.compute_savings_progress(
             monthly_stats['monthly_totals']
         )
 
-        # ── 핵심 저축 지표 ──
+        # ── Indicateurs clés d'épargne ──
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
@@ -512,7 +507,7 @@ def run_app():
         st.markdown('<div class="section-divider"></div>',
                     unsafe_allow_html=True)
 
-        # ── 저축 메시지 ──
+        # ── Message d'état de l'épargne ──
         remaining = savings_data['remaining']
         progress = savings_data['progress_pct']
 
@@ -528,16 +523,16 @@ def run_app():
                 f"d'épargne annuel de **{savings_data['goal']:.2f} €** !"
             )
 
-        # 진행률 바
+        # Barre de progression (sécurisée entre 0.0 et 1.0)
         st.progress(
-            max(0.0, min(progress / 100, 1.0)),  # 0.0 ~ 1.0 사이로 강제 제한
+            max(0.0, min(progress / 100, 1.0)),  # Contraindre la valeur dans [0,0 ; 1,0]
             text=f"Progression : {progress:.1f}%"
         )
 
         st.markdown('<div class="section-divider"></div>',
                     unsafe_allow_html=True)
 
-        # ── 게이지 차트 + 누적 저축 차트 ──
+        # ── Jauge + Graphique d'aire cumulée ──
         col_left, col_right = st.columns([0.4, 0.6])
 
         with col_left:
@@ -550,7 +545,7 @@ def run_app():
             )
             st.plotly_chart(fig_savings, use_container_width=True)
 
-        # ── 월별 저축 테이블 ──
+        # ── Tableau mensuel de l'épargne ──
         st.subheader("📋 Détail mensuel de l'épargne")
         st.dataframe(
             savings_data['savings_df'],
@@ -570,12 +565,12 @@ def run_app():
         )
 
     # ════════════════════════════════════════════
-    # TAB 4 : 지출 추이
+    # TAB 4 : TENDANCES
     # ════════════════════════════════════════════
     with tab4:
         st.subheader("📈 Tendances des Dépenses")
 
-        # ── 카테고리 필터 ──
+        # ── Filtre par catégorie ──
         all_categories = df['catégorie'].unique().tolist()
         selected_categories = st.multiselect(
             "Sélectionner les catégories à afficher",
@@ -585,22 +580,22 @@ def run_app():
         )
 
         if selected_categories:
-            # 선택된 카테고리만 필터링
+            # Filtrage des catégories sélectionnées
             filtered_monthly = monthly_stats['by_month_category'][
                 monthly_stats['by_month_category']['catégorie']
                 .isin(selected_categories)
             ]
 
-            # 선형 추이 그래프
+            # Graphique linéaire des tendances
             fig_trend = visualizer.plot_trend_lines(filtered_monthly)
             st.plotly_chart(fig_trend, use_container_width=True)
 
             st.markdown('<div class="section-divider"></div>',
                         unsafe_allow_html=True)
 
-            # ── 카테고리별 평균 지출 ──
+            # ── Moyennes mensuelles par catégorie ──
             st.subheader("📊 Moyenne mensuelle par catégorie")
-            # 선택된 카테고리의 평균 지출
+            # Moyenne des dépenses par catégorie choisie
             avg_data = monthly_stats['category_averages']
             avg_filtered = avg_data[
                 avg_data.index.isin(selected_categories)
@@ -613,7 +608,7 @@ def run_app():
             col_left, col_right = st.columns([0.6, 0.4])
 
             with col_left:
-                # 수평 막대 그래프
+                # Graphique en barres horizontales
                 import plotly.express as px
                 fig_avg = px.bar(
                     avg_filtered,
@@ -650,7 +645,7 @@ def run_app():
             st.markdown('<div class="section-divider"></div>',
                         unsafe_allow_html=True)
 
-            # ── 월별 총 지출 추이 ──
+            # ── Évolution du total mensuel ──
             st.subheader("📅 Évolution du total mensuel")
 
             monthly_totals = monthly_stats['monthly_totals'].copy()
@@ -659,7 +654,7 @@ def run_app():
             import plotly.graph_objects as go
             fig_total = go.Figure()
 
-            # 총 지출 선
+            # Ligne du total mensuel
             fig_total.add_trace(go.Scatter(
                 x=monthly_totals['mois'],
                 y=monthly_totals['total_mensuel'],
@@ -675,7 +670,7 @@ def run_app():
                 )
             ))
 
-            # 예산 기준선
+            # Ligne de référence budget
             fig_total.add_hline(
                 y=total_budget,
                 line_dash="dash",
@@ -684,7 +679,7 @@ def run_app():
                 annotation_position="top right"
             )
 
-            # 평균선
+            # Ligne de référence moyenne
             fig_total.add_hline(
                 y=avg_monthly,
                 line_dash="dot",
@@ -710,12 +705,12 @@ def run_app():
             )
 
     # ════════════════════════════════════════════
-    # TAB 5 : 보고서 다운로드
+    # TAB 5 : GÉNÉRATION DU RAPPORT
     # ════════════════════════════════════════════
     with tab5:
         st.subheader("📄 Générer et Télécharger le Rapport")
 
-        # ── 보고서 설정 ──
+        # ── Configuration du rapport ──
         col1, col2 = st.columns(2)
 
         with col1:
@@ -736,10 +731,10 @@ def run_app():
         st.markdown('<div class="section-divider"></div>',
                     unsafe_allow_html=True)
 
-        # ── 보고서 미리보기 ──
+        # ── Aperçu du rapport ──
         st.subheader("👁️ Aperçu du rapport")
 
-        # 보고서용 데이터 준비
+        # Préparation des données pour le rapport
         report_month_filter = None \
             if report_month == "Toute la période" \
             else report_month
@@ -763,7 +758,7 @@ def run_app():
             monthly_stats['monthly_totals']
         )
 
-        # 미리보기 테이블들
+        # Onglets d'aperçu
         preview_tab1, preview_tab2, preview_tab3 = st.tabs([
             "Catégories", "Budget", "Épargne"
         ])
@@ -792,14 +787,14 @@ def run_app():
         st.markdown('<div class="section-divider"></div>',
                     unsafe_allow_html=True)
 
-        # ── 다운로드 버튼 ──
+        # ── Bouton de téléchargement ──
         st.subheader("⬇️ Télécharger")
 
         if st.button("🔄 Générer le rapport", type="primary"):
             with st.spinner("Génération du rapport en cours..."):
                 try:
                     if report_format == "PDF":
-                        # PDF 생성
+                        # Génération PDF
                         pdf_bytes = report_gen.generate_pdf(
                             category_ratios=report_category_ratios,
                             budget_eval=report_budget_eval,
@@ -808,7 +803,7 @@ def run_app():
                             selected_month=report_month
                         )
 
-                        # 파일명 생성
+                        # Nom du fichier
                         date_str = datetime.now().strftime('%Y%m%d_%H%M')
                         filename = f"rapport_financier_{date_str}.pdf"
 
@@ -822,7 +817,7 @@ def run_app():
                         st.success("✅ PDF généré avec succès !")
 
                     else:
-                        # CSV ZIP 생성
+                        # Génération CSV ZIP
                         zip_bytes = report_gen.generate_csv(
                             category_ratios=report_category_ratios,
                             budget_eval=report_budget_eval,
@@ -852,10 +847,10 @@ def run_app():
 
 
 # ─────────────────────────────────────────────
-# 헬퍼 함수들
+# Fonctions d'aide (Helpers)
 # ─────────────────────────────────────────────
 def _show_welcome_screen():
-    """파일 미업로드 시 안내 화면"""
+    """Écran d'accueil affiché lorsqu'aucun fichier n'est importé"""
 
     st.markdown("---")
 
@@ -883,7 +878,7 @@ def _show_welcome_screen():
     st.markdown("---")
     st.markdown("### 📋 Format attendu du fichier")
 
-    # 예시 데이터 표시
+    # Données d'exemple
     sample_data = pd.DataFrame({
         'date': ['01/01/2024', '02/01/2024', '05/01/2024'],
         'libellé': ['CARREFOUR MARKET', 'SNCF BILLET', 'NETFLIX'],
@@ -900,9 +895,8 @@ def _show_welcome_screen():
 # A supprimer 
 def _generate_sample_csv() -> bytes:
     """
-    테스트용 샘플 CSV 파일 생성
-    사용자가 앱을 바로 테스트할 수 있도록
-    실제와 유사한 데이터 제공
+    Génère un fichier CSV d'exemple pour le test.
+    Fournit des données réalistes pour que l'utilisateur puisse tester l'app immédiatement.
     """
     sample_data = """date;libellé;montant
 01/01/2024;VIREMENT SALAIRE;2500.00

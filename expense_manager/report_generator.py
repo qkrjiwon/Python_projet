@@ -27,19 +27,18 @@ class ReportGenerator:
         self._setup_custom_styles()
 
     # ─────────────────────────────────────────────
-    # 커스텀 스타일 정의
-    # ReportLab 기본 스타일을 확장하여
-    # 보고서에 맞는 디자인 적용
+    # Définition des styles personnalisés
+    # Extension des styles de base de ReportLab pour le rapport
     # ─────────────────────────────────────────────
     def _setup_custom_styles(self):
         """Configuration des styles personnalisés pour le PDF"""
 
         # ─────────────────────────────────────────────
-        # 스타일 추가 전에 이미 존재하는지 확인
-        # 존재하면 추가하지 않음 → 충돌 방지
+        # Vérifie si le style existe déjà avant de l'ajouter
+        # Évite les erreurs de conflit lors de ré-initialisations
         # ─────────────────────────────────────────────
         def add_style_safe(style):
-            """스타일이 없을 때만 추가하는 안전한 함수"""
+            """Ajoute un style uniquement s'il n'existe pas déjà"""
             if style.name not in self.styles:
                 self.styles.add(style)
 
@@ -97,8 +96,8 @@ class ReportGenerator:
 
 
     # ─────────────────────────────────────────────
-    # PDF 생성 메인 함수
-    # 모든 섹션을 순서대로 조합하여 PDF 생성
+    # Fonction principale de génération PDF
+    # Combine toutes les sections pour créer le rapport final
     # ─────────────────────────────────────────────
     def generate_pdf(self,
                      category_ratios: pd.DataFrame,
@@ -107,11 +106,11 @@ class ReportGenerator:
                      monthly_stats: dict,
                      selected_month: str = None) -> bytes:
         """
-        전체 분석 보고서를 PDF로 생성
+        Génère un rapport d'analyse complet en format PDF.
 
         Returns:
-            bytes : PDF 파일 바이트 데이터
-                    → Streamlit에서 다운로드 버튼에 직접 사용 가능
+            bytes : Données binaires du fichier PDF 
+                    (utilisables directement pour le bouton de téléchargement Streamlit)
         """
         buffer = io.BytesIO()
 
@@ -124,31 +123,31 @@ class ReportGenerator:
             bottomMargin=2*cm
         )
 
-        # 보고서 구성 요소 리스트
+        # Liste des éléments constituant le document
         story = []
 
-        # ── 표지 섹션 ──
+        # ── Section Page de couverture ──
         story += self._build_cover(selected_month)
 
-        # ── 요약 섹션 ──
+        # ── Section Résumé ──
         story += self._build_summary(savings_data, monthly_stats)
 
-        # ── 카테고리 비율 섹션 ──
+        # ── Section Répartition par catégorie ──
         story += self._build_category_section(category_ratios)
 
-        # ── 예산 평가 섹션 ──
+        # ── Section Évaluation du budget ──
         story += self._build_budget_section(budget_eval)
 
-        # ── 저축 진행 섹션 ──
+        # ── Section Suivi de l'épargne ──
         story += self._build_savings_section(savings_data)
 
-        # PDF 빌드
+        # Construction du PDF
         doc.build(story)
         buffer.seek(0)
         return buffer.getvalue()
 
     def _build_cover(self, selected_month: str = None) -> list:
-        """보고서 표지 생성"""
+        """Génère la couverture du rapport"""
         elements = []
 
         elements.append(Spacer(1, 2*cm))
@@ -157,14 +156,14 @@ class ReportGenerator:
             self.styles['CustomTitle']
         ))
 
-        # 기간 표시
+        # Affichage de la période
         period = selected_month if selected_month else "Toute la période"
         elements.append(Paragraph(
             f"Période analysée : <b>{period}</b>",
             self.styles['SubHeader']
         ))
 
-        # 생성 날짜
+        # Date de génération
         elements.append(Paragraph(
             f"Généré le : {datetime.now().strftime('%d/%m/%Y à %H:%M')}",
             self.styles['SubHeader']
@@ -182,7 +181,7 @@ class ReportGenerator:
 
     def _build_summary(self, savings_data: dict,
                         monthly_stats: dict) -> list:
-        """핵심 요약 섹션 생성"""
+        """Génère la section Résumé Exécutif"""
         elements = []
 
         elements.append(Paragraph(
@@ -190,7 +189,7 @@ class ReportGenerator:
             self.styles['SectionHeader']
         ))
 
-        # 핵심 지표 테이블
+        # Tableau des indicateurs clés
         avg = monthly_stats.get('avg_monthly_total', 0)
         total_saved = savings_data.get('total_saved', 0)
         remaining = savings_data.get('remaining', 0)
@@ -207,14 +206,14 @@ class ReportGenerator:
 
         table = Table(summary_data, colWidths=[10*cm, 6*cm])
         table.setStyle(TableStyle([
-            # 헤더 스타일
+            # Style de l'en-tête
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2980B9')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 11),
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-            # 데이터 행 스타일
+            # Style des lignes de données
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 10),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1),
@@ -228,7 +227,7 @@ class ReportGenerator:
         elements.append(table)
         elements.append(Spacer(1, 0.5*cm))
 
-        # 저축 메시지
+        # Message sur l'épargne
         if remaining > 0:
             msg = f"💡 Il vous reste <b>{remaining:.2f} €</b> à épargner pour atteindre votre objectif."
             elements.append(Paragraph(msg, self.styles['HighlightRed']))
@@ -241,7 +240,7 @@ class ReportGenerator:
 
     def _build_category_section(self,
                                   category_ratios: pd.DataFrame) -> list:
-        """카테고리별 지출 비율 섹션"""
+        """Génère la section des dépenses par catégorie"""
         elements = []
 
         elements.append(Paragraph(
@@ -249,11 +248,11 @@ class ReportGenerator:
             self.styles['SectionHeader']
         ))
 
-        # 테이블 헤더
+        # En-tête du tableau
         table_data = [['Catégorie', 'Montant (€)', 'Pourcentage (%)']]
 
         for _, row in category_ratios.iterrows():
-            # 비율에 따라 시각적 바 생성
+            # Création d'une barre visuelle basée sur le pourcentage
             bar_length = int(row['pourcentage'] / 5)
             bar = '█' * bar_length
 
@@ -263,7 +262,7 @@ class ReportGenerator:
                 f"{row['pourcentage']:.1f}%  {bar}"
             ])
 
-        # 합계 행 추가
+        # Ajout d'une ligne de total
         table_data.append([
             'TOTAL',
             f"{category_ratios['total'].sum():.2f} €",
@@ -276,7 +275,7 @@ class ReportGenerator:
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
-            # 합계 행 강조
+            # Accentuation de la ligne Total
             ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#D5F5E3')),
             ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
             ('ROWBACKGROUNDS', (0, 1), (-1, -2),
@@ -295,7 +294,7 @@ class ReportGenerator:
 
     def _build_budget_section(self,
                                budget_eval: pd.DataFrame) -> list:
-        """예산 평가 섹션"""
+        """Génère la section d'évaluation du budget"""
         elements = []
 
         elements.append(Paragraph(
@@ -317,7 +316,7 @@ class ReportGenerator:
         table = Table(table_data,
                       colWidths=[4.5*cm, 3*cm, 3*cm, 3.5*cm, 3.5*cm])
 
-        # 행별 색상 조건부 적용
+        # Application conditionnelle des couleurs par ligne
         style_commands = [
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2C3E50')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
@@ -330,16 +329,16 @@ class ReportGenerator:
             ('LEFTPADDING', (0, 0), (-1, -1), 8),
         ]
 
-        # 초과/절약에 따라 행 색상 변경
+        # Changement de couleur selon dépassement ou économie
         for i, (_, row) in enumerate(budget_eval.iterrows(), start=1):
             if row['différence (€)'] < 0:
-                # 예산 초과 → 연한 빨강
+                # Dépassement de budget → Rouge clair
                 style_commands.append(
                     ('BACKGROUND', (0, i), (-1, i),
                      colors.HexColor('#FADBD8'))
                 )
             else:
-                # 예산 내 → 연한 초록
+                # Dans le budget → Vert clair
                 style_commands.append(
                     ('BACKGROUND', (0, i), (-1, i),
                      colors.HexColor('#D5F5E3'))
@@ -351,7 +350,7 @@ class ReportGenerator:
         return elements
 
     def _build_savings_section(self, savings_data: dict) -> list:
-        """저축 진행 섹션"""
+        """Génère la section du suivi de l'épargne"""
         elements = []
 
         elements.append(Paragraph(
@@ -389,7 +388,7 @@ class ReportGenerator:
              [colors.white, colors.HexColor('#EBF5FB')]),
         ]
 
-        # 월별 저축이 음수(지출 초과)인 경우 빨간색 표시
+        # Si l'épargne mensuelle est négative (dépenses > revenus), affichage en rouge
         for i, (_, row) in enumerate(savings_df.iterrows(), start=1):
             if row['épargne_mois'] < 0:
                 style_commands.append(
@@ -401,7 +400,7 @@ class ReportGenerator:
         elements.append(table)
         elements.append(Spacer(1, 0.3*cm))
 
-        # 최종 메시지
+        # Message de fin
         remaining = savings_data['remaining']
         progress = savings_data['progress_pct']
 
@@ -425,8 +424,8 @@ class ReportGenerator:
         return elements
 
     # ─────────────────────────────────────────────
-    # CSV 생성
-    # 여러 DataFrame을 하나의 ZIP으로 묶어서 반환
+    # Génération CSV
+    # Regroupe plusieurs DataFrames dans une archive ZIP
     # ─────────────────────────────────────────────
     def generate_csv(self,
                      category_ratios: pd.DataFrame,
@@ -434,17 +433,17 @@ class ReportGenerator:
                      savings_data: dict,
                      transactions: pd.DataFrame) -> bytes:
         """
-        분석 데이터를 CSV 파일들로 생성 후 ZIP으로 압축
+        Génère les données d'analyse en fichiers CSV et les compresse en ZIP.
 
         Returns:
-            bytes : ZIP 파일 바이트 데이터
+            bytes : Données binaires du fichier ZIP
         """
         zip_buffer = io.BytesIO()
 
         with zipfile.ZipFile(zip_buffer, 'w',
                              zipfile.ZIP_DEFLATED) as zip_file:
 
-            # 1. 카테고리 비율 CSV
+            # 1. CSV des ratios par catégorie
             csv1 = io.StringIO()
             category_ratios.to_csv(csv1, index=False, sep=';',
                                     encoding='utf-8-sig')
@@ -453,7 +452,7 @@ class ReportGenerator:
                 csv1.getvalue()
             )
 
-            # 2. 예산 평가 CSV
+            # 2. CSV de l'évaluation du budget
             csv2 = io.StringIO()
             budget_eval.to_csv(csv2, index=False, sep=';',
                                 encoding='utf-8-sig')
@@ -462,7 +461,7 @@ class ReportGenerator:
                 csv2.getvalue()
             )
 
-            # 3. 저축 추이 CSV
+            # 3. CSV du suivi de l'épargne
             csv3 = io.StringIO()
             savings_data['savings_df'].to_csv(
                 csv3, index=False, sep=';', encoding='utf-8-sig'
@@ -472,7 +471,7 @@ class ReportGenerator:
                 csv3.getvalue()
             )
 
-            # 4. 전체 거래 내역 CSV
+            # 4. CSV des transactions complètes
             csv4 = io.StringIO()
             transactions.to_csv(csv4, index=False, sep=';',
                                   encoding='utf-8-sig')
