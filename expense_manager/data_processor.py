@@ -9,6 +9,7 @@ from datetime import datetime
 import re
 
 
+
 # ─────────────────────────────────────────────
 # Dictionnaire de mots-clés pour la catégorisation automatique
 # Chaque catégorie contient des mots-clés typiques trouvés
@@ -59,7 +60,7 @@ CATEGORY_KEYWORDS = {
 class DataProcessor:
     """
     Classe principale pour le traitement des données bancaires.
-    
+
     """
 
     def __init__(self):
