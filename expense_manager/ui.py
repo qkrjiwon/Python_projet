@@ -530,7 +530,7 @@ def run_app():
 
         # 진행률 바
         st.progress(
-            min(progress / 100, 1.0),
+            max(0.0, min(progress / 100, 1.0)),  # 0.0 ~ 1.0 사이로 강제 제한
             text=f"Progression : {progress:.1f}%"
         )
 

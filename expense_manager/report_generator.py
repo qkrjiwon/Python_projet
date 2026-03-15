@@ -322,8 +322,7 @@ class ReportGenerator:
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2C3E50')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('GRID', (0, 0), (-1, -1)),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#BDC3C7')),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#BDC3C7')),  # ✅ 수정
             ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
             ('ALIGN', (0, 0), (0, -1), 'LEFT'),
             ('TOPPADDING', (0, 0), (-1, -1), 5),
