@@ -60,10 +60,6 @@ class DataProcessor:
     """
     Classe principale pour le traitement des données bancaires.
     
-    Pourquoi une classe ?
-    → Permet de conserver l'état des données traitées entre les appels
-    → Facilite les tests unitaires
-    → Sépare clairement les responsabilités
     """
 
     def __init__(self):
