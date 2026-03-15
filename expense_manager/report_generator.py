@@ -32,9 +32,18 @@ class ReportGenerator:
     # 보고서에 맞는 디자인 적용
     # ─────────────────────────────────────────────
     def _setup_custom_styles(self):
-        """PDF 커스텀 스타일 설정"""
+        """Configuration des styles personnalisés pour le PDF"""
 
-        self.styles.add(ParagraphStyle(
+        # ─────────────────────────────────────────────
+        # 스타일 추가 전에 이미 존재하는지 확인
+        # 존재하면 추가하지 않음 → 충돌 방지
+        # ─────────────────────────────────────────────
+        def add_style_safe(style):
+            """스타일이 없을 때만 추가하는 안전한 함수"""
+            if style.name not in self.styles:
+                self.styles.add(style)
+
+        add_style_safe(ParagraphStyle(
             name='CustomTitle',
             parent=self.styles['Title'],
             fontSize=24,
@@ -43,7 +52,7 @@ class ReportGenerator:
             alignment=TA_CENTER
         ))
 
-        self.styles.add(ParagraphStyle(
+        add_style_safe(ParagraphStyle(
             name='SectionHeader',
             parent=self.styles['Heading1'],
             fontSize=14,
@@ -53,7 +62,7 @@ class ReportGenerator:
             borderPad=4
         ))
 
-        self.styles.add(ParagraphStyle(
+        add_style_safe(ParagraphStyle(
             name='SubHeader',
             parent=self.styles['Heading2'],
             fontSize=11,
@@ -62,7 +71,7 @@ class ReportGenerator:
             spaceAfter=4
         ))
 
-        self.styles.add(ParagraphStyle(
+        add_style_safe(ParagraphStyle(
             name='BodyText',
             parent=self.styles['Normal'],
             fontSize=10,
@@ -70,7 +79,7 @@ class ReportGenerator:
             spaceAfter=4
         ))
 
-        self.styles.add(ParagraphStyle(
+        add_style_safe(ParagraphStyle(
             name='HighlightGreen',
             parent=self.styles['Normal'],
             fontSize=11,
@@ -78,13 +87,14 @@ class ReportGenerator:
             spaceAfter=4
         ))
 
-        self.styles.add(ParagraphStyle(
+        add_style_safe(ParagraphStyle(
             name='HighlightRed',
             parent=self.styles['Normal'],
             fontSize=11,
             textColor=colors.HexColor('#E74C3C'),
             spaceAfter=4
         ))
+
 
     # ─────────────────────────────────────────────
     # PDF 생성 메인 함수
@@ -312,7 +322,7 @@ class ReportGenerator:
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2C3E50')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('GRID', (0, 0), (-1, -1),)
+            ('GRID', (0, 0), (-1, -1)),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#BDC3C7')),
             ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
             ('ALIGN', (0, 0), (0, -1), 'LEFT'),
