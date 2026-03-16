@@ -17,41 +17,45 @@ import re
 # ─────────────────────────────────────────────
 CATEGORY_KEYWORDS = {
     "Loyer": [
-        "loyer", "rent", "bail", "propriétaire", "agence immobilière",
-        "charges locatives", "syndic"
+        "loyer", "rent", "bail", "propriétaire", "proprietaire", 
+        "agence immobilière", "agence immobiliere", 
+        "charges", "charges locatives", "syndic"
     ],
     "Alimentation": [
-        "carrefour", "leclerc", "lidl", "aldi", "monoprix", "intermarché",
-        "casino", "franprix", "picard", "boulangerie", "supermarché",
-        "épicerie", "marché", "bio c bon", "naturalia"
+        "carrefour", "leclerc", "lidl", "aldi", "monoprix", 
+        "intermarché", "intermarche", "casino", "franprix", 
+        "picard", "boulangerie", "supermarché", "supermarche",
+        "épicerie", "epicerie", "marché", "marche", "bio c bon", "naturalia"
     ],
     "Transport": [
         "sncf", "ratp", "navigo", "uber", "blablacar", "total", "bp",
-        "shell", "esso", "station service", "parking", "péage",
-        "autoroute", "taxi", "vélib", "trottinette"
+        "shell", "esso", "station service", "parking", "péage", "peage",
+        "autoroute", "taxi", "vélib", "velib","trottinette",
+        "imagine r"
     ],
     "Shopping": [
-        "amazon", "zara", "h&m", "fnac", "darty", "ikea", "decathlon",
+        "amazon", "zara", "h&m", "hm", "fnac", "darty", "ikea", "decathlon",
         "asos", "zalando", "cdiscount", "la redoute", "bershka",
-        "primark", "uniqlo", "sephora", "marionnaud"
+        "primark", "uniqlo", "sephora", "marionnaud",
+        "aliexpress", "wish", "shein", "vinted", "le bon coin", "leboncoin"
     ],
     "Loisirs": [
-        "netflix", "spotify", "disney", "canal+", "cinema", "théâtre",
-        "musée", "concert", "restaurant", "bar", "café", "mcdo",
+        "netflix", "spotify", "disney", "canal+", "cinema", "théâtre", "theatre",
+        "musée", "musee", "concert", "restaurant", "bar", "café", "cafe", "mcdo",
         "mcdonald", "burger king", "kfc", "sushi", "pizzeria",
         "playstation", "steam", "jeux"
     ],
     "Remboursement": [
-        "crédit", "prêt", "emprunt", "mensualité", "remboursement",
-        "banque", "cetelem", "sofinco", "cofidis", "credit agricole loan",
-        "intérêts", "capital"
+        "crédit", "credit", "prêt", "pret","emprunt", "mensualité", "mensualite",
+        "remboursement", "banque", "cetelem", "sofinco", "cofidis", "credit agricole loan",
+        "intérêts", "interets", "capital"
     ],
     "Santé": [
-        "pharmacie", "médecin", "docteur", "clinique", "hôpital",
-        "dentiste", "opticien", "mutuelle", "assurance santé"
+        "pharmacie", "médecin", "medecin", "docteur", "clinique", "hôpital", "hopital",
+        "dentiste", "opticien", "mutuelle", "assurance santé", "assurance sante", "laboratoire"
     ],
     "Abonnements": [
-        "sfr", "orange", "bouygues", "free", "numéricable",
+        "sfr", "orange", "bouygues", "free", "numéricable", "numericable",
         "assurance", "edf", "engie", "eau", "internet"
     ],
 }
