@@ -77,7 +77,7 @@ def run_app():
         unsafe_allow_html=True
     )
     st.markdown(
-        '<div class="subtitle">Analysez vos finances, respectez votre budget, atteignez vos objectifs</div>',
+        '<div class="subtitle">Analysez vos finances, respectez votre budget, atteignez vos objectifs !</div>',
         unsafe_allow_html=True
     )
 
@@ -97,6 +97,7 @@ def run_app():
         )
 
         # Bouton de téléchargement du fichier exemple
+        st.caption("Voici un exemple de fichier pour tester :")
         sample_csv = _generate_sample_csv()
         st.download_button(
             label="📥 Télécharger un fichier exemple",
@@ -110,19 +111,19 @@ def run_app():
 
         # ── 2. Correspondance des colonnes ──
         st.subheader("🗂️ Correspondance des colonnes")
-        st.caption("Indiquez quelles colonnes correspondent à quoi")
+        st.caption("Indiquez le nom de chaque colonne de votre relevé.")
 
         col_date = st.text_input(
             "Colonne Date", value="date",
-            help="Nom exact de la colonne date dans votre fichier"
-        )
-        col_amount = st.text_input(
-            "Colonne Montant", value="montant",
-            help="Nom exact de la colonne montant"
+            help="Nom exact de la colonne date dans votre relevé"
         )
         col_label = st.text_input(
             "Colonne Libellé", value="libellé",
-            help="Nom exact de la colonne description"
+            help="Nom exact de la colonne description dans votre relevé"
+        )
+        col_amount = st.text_input(
+            "Colonne Montant", value="montant",
+            help="Nom exact de la colonne montant dans votre relevé"
         )
 
         st.markdown("---")
@@ -140,7 +141,7 @@ def run_app():
 
         if savings_goal > 0:
             st.info(
-                f"💡 Soit **{savings_goal/12:.2f} €/mois** à mettre de côté"
+                f"💡 Soit **{savings_goal/12:.2f} €/mois** à épargner"
             )
 
         st.caption("Budget mensuel par catégorie (€)")
@@ -888,7 +889,7 @@ def _show_welcome_screen():
     st.dataframe(sample_data, use_container_width=True, hide_index=True)
     st.caption(
         "💡 Les dépenses doivent être en montants négatifs, "
-        "les revenus en positifs"
+        "les revenus en positifs."
     )
 
 
