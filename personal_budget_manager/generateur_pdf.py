@@ -52,38 +52,42 @@ class GenerateurPDF:
             spaceAfter=4, leading=14
         )
 
-        # Style pour les messages positifs (économie/dépassement)
+        # Style pour les messages positifs (économie)
         self.style_succes = ParagraphStyle(
             'Succes', parent=self.styles['Normal'],
             fontSize=10, textColor=colors.HexColor('#27ae60'),
             spaceAfter=4, fontName='Helvetica-Bold'
         )
+
+        # Style utilisé pour les messages négatifs (dépassement de budget)
         self.style_alerte = ParagraphStyle(
             'Alerte', parent=self.styles['Normal'],
             fontSize=10, textColor=colors.HexColor('#e74c3c'),
             spaceAfter=4, fontName='Helvetica-Bold'
         )
 
+    # Convertit une image en buffer en objet affichable dans le PDF.
     def _ajouter_image(self, buf_image, largeur=14*cm, hauteur=8*cm):
         buf_image.seek(0)
         return RLImage(buf_image, width=largeur, height=hauteur)
-
+    
+    # Fonction principale pour générer le rapport PDF.
     def generer(self, categories, moyenne_mensuelle, comparaison,
                 epargne, buf_camembert_par_mois, buf_barres,
                 buf_tendances, buf_epargne):
         """
-        PDF 보고서를 생성하는 메인 함수
+        Paramètres :
+            categories             : résultat de l'analyse des catégories
+            moyenne_mensuelle      : moyenne des dépenses par mois
+            comparaison            : comparaison budget vs dépenses
+            epargne                : informations sur l'épargne
+            buf_camembert_par_mois : graphique camembert mensuel
+            buf_barres             : graphique en barres du budget
+            buf_tendances          : graphique des tendances
+            buf_epargne            : graphique de l'épargne
 
-        매개변수:
-            categories             = analyser_categories() 결과
-            moyenne_mensuelle      = calculer_moyenne_mensuelle() 결과
-            comparaison            = comparer_budget() 결과
-            epargne                = calculer_epargne() 결과
-            buf_camembert_par_mois = graphique_camembert_par_mois() 이미지 ✅
-            buf_barres             = graphique_barres_budget() 이미지
-            buf_tendances          = graphique_tendances() 이미지
-            buf_epargne            = graphique_epargne() 이미지
         """
+        # Création du document PDF avec marges
         doc = SimpleDocTemplate(
             self.chemin_sortie, pagesize=A4,
             rightMargin=2*cm, leftMargin=2*cm,
@@ -92,36 +96,39 @@ class GenerateurPDF:
 
         contenu = []
 
-        # ---- 제목 ----
+        # ===== Titre =====
         contenu.append(Paragraph("Rapport de Gestion Budget", self.style_titre))
+        # Sous-titre
         contenu.append(Paragraph(
             "Analyse complète de vos dépenses personnelles",
             ParagraphStyle('sous_titre', parent=self.styles['Normal'],
                            fontSize=11, textColor=colors.HexColor('#7f8c8d'),
                            alignment=TA_CENTER, spaceAfter=15)
         ))
+        # Ligne de séparation
         contenu.append(HRFlowable(width="100%", thickness=1.5,
                                    color=colors.HexColor('#3498db'), spaceAfter=15))
 
-        # ---- 섹션 1: 월별 파이 차트 ✅ ----
+        # ---- Section 1: Répartition des dépenses mensuelles par catégorie ----
         contenu.append(Paragraph("1. Répartition des dépenses mensuelles par catégorie",
                                   self.style_section))
         contenu.append(Spacer(1, 10))
 
-        # 달 수에 따라 이미지 높이 자동 조정
+        # Calcul de la hauteur du graphique selon le nombre de mois
         nb_mois   = len(moyenne_mensuelle['par_mois'])
-        nb_lignes = max(1, (nb_mois + 2) // 3)   # 3개씩 한 줄
+        nb_lignes = max(1, (nb_mois + 2) // 3)   #  Par lignes de trois
         hauteur_camembert = min(20, nb_lignes * 7) * cm
-
+        # Ajout du graphique
         contenu.append(self._ajouter_image(buf_camembert_par_mois, 16*cm, hauteur_camembert))
         contenu.append(Spacer(1, 15))
 
-        # 전체 합산 요약 표
+        # Tableau récapitulatif des dépenses par catégorie
         tableau_data = [['Catégories', 'Dépenses cumulées', 'Répartition (%)']]
         for cat, vals in categories.items():
             tableau_data.append([cat, f"{vals['total']:.2f} €", f"{vals['pourcentage']} %"])
 
         tableau = Table(tableau_data, colWidths=[7*cm, 5*cm, 4*cm])
+        # Style du tableau
         tableau.setStyle(TableStyle([
             ('BACKGROUND',    (0, 0), (-1, 0),  colors.HexColor('#2980b9')),
             ('TEXTCOLOR',     (0, 0), (-1, 0),  colors.white),
@@ -138,7 +145,7 @@ class GenerateurPDF:
         contenu.append(tableau)
         contenu.append(Spacer(1, 10))
 
-        # ---- 섹션 2: 월별 평균 + 월급/잔액 ✅ ----
+        # ---- Section 2: Moyenne mensuelle des dépenses ----
         contenu.append(Paragraph("2. Moyenne mensuelle des dépenses",
                                   self.style_section))
         contenu.append(Paragraph(
@@ -146,31 +153,32 @@ class GenerateurPDF:
             self.style_corps
         ))
 
-        # 월급 데이터가 있으면 열을 더 추가
+        # Récapitulatif des dépenses dans le tableau avec le solde restant
         a_salaire = moyenne_mensuelle.get('a_un_salaire', False)
+         # Création du tableau avec 4 colonnes (mois, dépenses, salaire, solde)
+        mois_data = [['Mois', 'Dépenses', 'Salaire', 'Solde restant']]
 
-        if a_salaire:
-            mois_data = [['Mois', 'Dépenses', 'Salaire', 'Solde restant']]
-            for mois, vals in moyenne_mensuelle['par_mois'].items():
-                salaire = f"{vals['salaire']:.2f} €" if vals['salaire'] else "—"
-                solde   = f"{vals['solde']:.2f} €"   if vals['solde']   else "—"
-                # 잔액이 마이너스면 빨간색
-                if vals['solde'] is not None and vals['solde'] < 0:
-                    solde = f"<font color='red'>{vals['solde']:.2f} €</font>"
-                style_solde = ParagraphStyle('solde', parent=self.styles['Normal'], alignment=TA_CENTER, fontSize=9, textColor=colors.black)
-                mois_data.append([
-                    mois,
-                    f"{vals['depenses']:.2f} €",
-                    salaire,
-                    Paragraph(solde, style_solde)
-                ])
-            col_widths = [5*cm, 4*cm, 4*cm, 4*cm]
-        else:
-            mois_data = [['Mois', 'Dépenses totales']]
-            for mois, vals in moyenne_mensuelle['par_mois'].items():
-                mois_data.append([mois, f"{vals['depenses']:.2f} €"])
-            col_widths = [9*cm, 7*cm]
+        # Parcours des données mensuelles
+        for mois, vals in moyenne_mensuelle['par_mois'].items():
+            # Affichage du salaire (si présent), sinon tiret
+            salaire = f"{vals['salaire']:.2f} €" if vals['salaire'] else "—"
+            # Affichage du solde restant (si présent), sinon tiret
+            solde   = f"{vals['solde']:.2f} €"   if vals['solde']   else "—"
+            # Si le solde est négatif, on l'affiche en rouge pour signaler un problème
+            if vals['solde'] is not None and vals['solde'] < 0:
+                solde = f"<font color='red'>{vals['solde']:.2f} €</font>"
+            # Style centré pour la cellule du solde
+            style_solde = ParagraphStyle('solde', parent=self.styles['Normal'], alignment=TA_CENTER, fontSize=9, textColor=colors.black)
+            # Ajout d'une ligne au tableau
+            mois_data.append([
+                mois,
+                f"{vals['depenses']:.2f} €",
+                salaire,
+                Paragraph(solde, style_solde)
+            ])
+        col_widths = [5*cm, 4*cm, 4*cm, 4*cm]
 
+        # Création du tableau PDF avec les données construites
         tableau_mois = Table(mois_data, colWidths=col_widths)
         tableau_mois.setStyle(TableStyle([
             ('BACKGROUND',    (0, 0), (-1, 0),  colors.HexColor('#27ae60')),
@@ -184,19 +192,23 @@ class GenerateurPDF:
             ('TOPPADDING',    (0, 0), (-1, -1), 6),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
         ]))
+        # Ajout du tableau au document PDF
         contenu.append(tableau_mois)
         contenu.append(Spacer(1, 10))
 
-        # ---- 섹션 3: 예산 준수 여부 ----
+        # ---- Section 3 : Vérification du respect du budget ----
         contenu.append(Paragraph("3. Respect du budget par catégorie", self.style_section))
         contenu.append(self._ajouter_image(buf_barres, 16*cm, 7.5*cm))
         contenu.append(Spacer(1, 8))
 
+        # Parcourt chaque catégorie pour afficher un résumé textuel
         for cat, vals in comparaison.items():
+            # Si les dépenses sont inférieures au budget, il s'agit d'une économie
             if vals['statut'] == 'économie':
                 msg = (f"<b>{cat}</b> : Budget {vals['budget_total']:.2f}€ → "
                        f"Dépensé {vals['depense_totale']:.2f}€ → "
                        f"<font color='green'>Économie de {vals['ecart']:.2f}€</font>")
+            # Sinon, cela signifie que le budget a été dépassé
             else:
                 msg = (f"<b>{cat}</b> : Budget {vals['budget_total']:.2f}€ → "
                        f"Dépensé {vals['depense_totale']:.2f}€ → "
@@ -205,22 +217,26 @@ class GenerateurPDF:
 
         contenu.append(Spacer(1, 10))
 
-        # ---- 섹션 4: 저축 달성률 ----
+        # ---- Section 4 : Suivi de l'épargne ----
         contenu.append(Paragraph("4. Épargne accumulée", self.style_section))
         contenu.append(self._ajouter_image(buf_epargne, 14*cm, 4*cm))
         contenu.append(Spacer(1, 6))
 
+        # Affiche la situation actuelle de l'épargne par rapport à l'objectif fixé
         contenu.append(Paragraph(
             f"Épargne actuelle : <b>{epargne['epargne_accumulee']:.2f}€</b> "
             f"sur un objectif de <b>{epargne['objectif']:.2f}€</b> "
             f"({epargne['pourcentage_atteint']}% atteint)",
             self.style_corps
         ))
+        # Affiche la situation actuelle de l'épargne par rapport à l'objectif fixé
         if epargne['restant'] > 0:
             contenu.append(Paragraph(
                 f"Il vous reste <b>{epargne['restant']:.2f}€</b> à économiser.",
                 self.style_corps
             ))
+            
+        # Ajoute un espace avant la section suivante
         else:
             contenu.append(Paragraph(
                 "Félicitations ! Vous avez atteint votre objectif d'épargne !",
@@ -229,9 +245,10 @@ class GenerateurPDF:
 
         contenu.append(Spacer(1, 10))
 
-        # ---- 섹션 5: 추세 그래프 ----
+        # ---- Section 5 : Analyse des tendances ----
         contenu.append(Paragraph("5. Tendances des dépenses", self.style_section))
         contenu.append(self._ajouter_image(buf_tendances, 16*cm, 7.5*cm))
 
+        # Génère et enregistre le document PDF final
         doc.build(contenu)
         print(f"Rapport PDF généré : {self.chemin_sortie}")
