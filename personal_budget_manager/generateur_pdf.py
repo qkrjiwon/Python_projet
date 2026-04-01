@@ -7,35 +7,52 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 
-
+# Classe permettant de générer un rapport PDF de gestion de budget.
 class GenerateurPDF:
-    """
-    사용법:
-        gen = GenerateurPDF("rapport.pdf")
-        gen.generer(...)
-    """
 
     def __init__(self, chemin_sortie="rapport_budget.pdf"):
+         # Chemin de sortie du fichier PDF
         self.chemin_sortie = chemin_sortie
+        # Styles par défaut fournis par reportlab
         self.styles        = getSampleStyleSheet()
+        # Création des styles personnalisés
         self._creer_styles()
-
+    
+    # Crée et configure les styles personnalisés utilisés dans le PDF.
     def _creer_styles(self):
+        """
+        Crée et configure les styles personnalisés utilisés dans le PDF.
+
+        Cette méthode permet de définir l'apparence des différents éléments du rapport :
+        - le titre principal
+         les titres de sections
+        - le texte courant
+        - les messages de succès (économie)
+        - les messages d'alerte (dépassement)
+        """
+
+         # Style du titre principal (grand, centré, en gras)
         self.style_titre = ParagraphStyle(
             'MonTitre', parent=self.styles['Title'],
             fontSize=22, textColor=colors.HexColor('#2c3e50'),
             spaceAfter=6, alignment=TA_CENTER, fontName='Helvetica-Bold'
         )
+
+        # Style des titres de sections (plus petits que le titre principal)
         self.style_section = ParagraphStyle(
             'MaSection', parent=self.styles['Heading2'],
             fontSize=13, textColor=colors.HexColor('#2980b9'),
             spaceBefore=14, spaceAfter=6, fontName='Helvetica-Bold'
         )
+
+        # Style du texte normal
         self.style_corps = ParagraphStyle(
             'MonCorps', parent=self.styles['Normal'],
             fontSize=10, textColor=colors.HexColor('#34495e'),
             spaceAfter=4, leading=14
         )
+
+        # Style pour les messages positifs (économie/dépassement)
         self.style_succes = ParagraphStyle(
             'Succes', parent=self.styles['Normal'],
             fontSize=10, textColor=colors.HexColor('#27ae60'),

@@ -1,0 +1,22 @@
+{
+    // =============================================================
+    // .vscode/extensions.json
+    // 
+    // 이 파일이 있으면 VS Code가 자동으로
+    // "이 extension들을 설치하시겠어요?" 라고 물어봐줘요.
+    //
+    // 적용 방법: 이 파일을 .vscode 폴더 안에 넣기
+    // =============================================================
+    "recommendations": [
+        // 파이썬 개발 필수
+        "ms-python.python",
+        "ms-python.pylance",
+ 
+        // CSV 파일을 색상으로 구분해서 보여줌 (Rainbow CSV)
+        "mechatroner.rainbow-csv",
+ 
+        // PDF 파일을 VS Code 안에서 바로 볼 수 있음
+        "tomoki1207.pdf"
+    ]
+}
+ 
