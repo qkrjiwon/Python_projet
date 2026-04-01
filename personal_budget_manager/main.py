@@ -1,8 +1,5 @@
 # =============================================================
-# main.py
-# Rôle : Point d'entrée du programme — Importe toutes les classes
-#        et les exécute dans l'ordre.
-#
+# Rôle : Point d'entrée du programme — Importe toutes les classes et les exécute dans l'ordre.
 # Exécution (dans le terminal VS Code) :
 #   python main.py
 # =============================================================

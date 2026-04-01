@@ -29,8 +29,9 @@ class GenerateurPDF:
         - le texte courant
         - les messages de succès (économie)
         - les messages d'alerte (dépassement)
+        
         """
-
+        
          # Style du titre principal (grand, centré, en gras)
         self.style_titre = ParagraphStyle(
             'MonTitre', parent=self.styles['Title'],

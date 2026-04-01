@@ -19,12 +19,9 @@ COULEURS_CATEGORIES = {
     'Autre':              '#95a5a6'
 }
 
-
+# Classe qui génère des graphiques financiers pour le rapport PDF.
 class Visualiseur:
-    """
-    Génère des graphiques financiers pour le rapport PDF.
-    """
-
+    
     def __init__(self):
         # Configuration globale du style des graphiques
         plt.rcParams['font.family']      = 'DejaVu Sans'

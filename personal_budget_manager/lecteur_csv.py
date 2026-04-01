@@ -60,6 +60,7 @@ class LecteurCSV:
             - Ajout d'une colonne Montant_abs (valeur absolue des dépenses)
             - Classement des dépenses par catégorie
             - Identification des virements de salaire
+            
         """
         try:
             df = pd.read_csv(self.chemin_fichier, sep=';', encoding='utf-8-sig')

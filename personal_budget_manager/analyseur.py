@@ -6,7 +6,6 @@ MOIS_FR = {
     9: 'Septembre', 10: 'Octobre', 11: 'Novembre', 12: 'Décembre'
 }
 
-
 class AnalyseurDepenses:
     """
     Classe pour analyser les données de dépenses.
