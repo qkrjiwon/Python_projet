@@ -21,9 +21,7 @@ COULEURS_CATEGORIES = {
 
 class Visualiseur:
     """
-    Utilisation :
-    vis = Visualiseur()
-    buf = vis.graphique_camembert(categories)
+    Génère des graphiques financiers pour le rapport PDF.
     """
 
     def __init__(self):

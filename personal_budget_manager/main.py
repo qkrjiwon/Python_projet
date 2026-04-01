@@ -51,7 +51,7 @@ if __name__ == "__main__":
     categories              = analyseur.analyser_categories()
     categories_par_mois     = analyseur.analyser_categories_par_mois()  
     moyenne                 = analyseur.calculer_moyenne_mensuelle()
-    comparaison, economise  = analyseur.comparer_budget(MES_BUDGETS)
+    comparaison, _          = analyseur.comparer_budget(MES_BUDGETS)
     epargne                 = analyseur.calculer_epargne(MES_BUDGETS, OBJECTIF_EPARGNE)
     tendances               = analyseur.analyser_tendances()
  
