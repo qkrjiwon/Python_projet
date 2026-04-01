@@ -13,6 +13,7 @@ from analyseur      import AnalyseurDepenses   # analyseur.py
 from visualiseur    import Visualiseur         # visualiseur.py
 from generateur_pdf import GenerateurPDF       # generateur_pdf.py
 
+# Le nom du fichier où se trouvent les dépenses
 CHEMIN_CSV = "transactions.csv"
  
 # Définition des budgets mensuels par catégorie
@@ -24,8 +25,10 @@ MES_BUDGETS = {
     'Loisirs':             60,
     'Remboursement prêt': 200,
 }
- 
+
+# La somme que tu aimerais mettre de côté
 OBJECTIF_EPARGNE = 1500.0
+# Le nom du fichier final
 CHEMIN_PDF       = "rapport_budget.pdf"
   
 # =============================================================
@@ -39,7 +42,8 @@ if __name__ == "__main__":
     print("\n Lecture du fichier CSV...")
     lecteur = LecteurCSV(CHEMIN_CSV)
     donnees = lecteur.lire()
- 
+
+    # Si le fichier est vide ou introuvable, on arrête tout proprement
     if donnees is None:
         print("Impossible de lire le fichier. Programme arrêté.")
         exit()
@@ -83,7 +87,8 @@ if __name__ == "__main__":
     # ÉTAPE 4 : Génération des graphiques
     print("\n Création des graphiques...")
     vis = Visualiseur()
- 
+
+    # On génère chaque graphique
     buf_camembert_par_mois = vis.graphique_camembert_par_mois(  
         categories_par_mois,
         "Répartition des dépenses par mois"
@@ -101,6 +106,8 @@ if __name__ == "__main__":
     # ÉTAPE 5 : Génération du rapport PDF
     print("\n Génération du rapport PDF...")
     gen = GenerateurPDF(CHEMIN_PDF)
+
+    # On donne au générateur toutes les données calculées et tous les graphiques
     gen.generer(
         categories, moyenne, comparaison, epargne,
         buf_camembert_par_mois,   
