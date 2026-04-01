@@ -1,12 +1,13 @@
 # =============================================================
 # main.py
-# 역할: 프로그램 시작점 — 모든 클래스를 import해서 순서대로 실행
+# Rôle : Point d'entrée du programme — Importe toutes les classes
+#        et les exécute dans l'ordre.
 #
-# 실행 방법 (VS Code 터미널에서):
+# Exécution (dans le terminal VS Code) :
 #   python main.py
 # =============================================================
 
-# ↓ 같은 폴더의 파일들에서 클래스 가져오기
+# Importation des classes depuis les fichiers du même dossier
 from lecteur_csv   import LecteurCSV          # lecteur_csv.py
 from analyseur      import AnalyseurDepenses   # analyseur.py
 from visualiseur    import Visualiseur         # visualiseur.py
@@ -14,6 +15,7 @@ from generateur_pdf import GenerateurPDF       # generateur_pdf.py
 
 CHEMIN_CSV = "transactions.csv"
  
+# Définition des budgets mensuels par catégorie
 MES_BUDGETS = {
     'Transport':          150,
     'Alimentation':       250,
@@ -30,10 +32,10 @@ CHEMIN_PDF       = "rapport_budget.pdf"
 if __name__ == "__main__":
  
     print("=" * 55)
-    print("   GESTION BUDGET PERSONNEL - 가계부 프로그램")
+    print("   GESTION BUDGET PERSONNEL - Rapport de dépenses")
     print("=" * 55)
  
-    # 1단계: CSV 읽기
+    # ÉTAPE 1 : Lecture du fichier CSV
     print("\n Lecture du fichier CSV...")
     lecteur = LecteurCSV(CHEMIN_CSV)
     donnees = lecteur.lire()
@@ -42,7 +44,7 @@ if __name__ == "__main__":
         print("Impossible de lire le fichier. Programme arrêté.")
         exit()
  
-    # 2단계: 분석
+    # ÉTAPE 2 : Analyse des données
     print("\n Analyse des données...")
     analyseur = AnalyseurDepenses(donnees)
  
@@ -53,7 +55,7 @@ if __name__ == "__main__":
     epargne                 = analyseur.calculer_epargne(MES_BUDGETS, OBJECTIF_EPARGNE)
     tendances               = analyseur.analyser_tendances()
  
-    # 3단계: 터미널 출력
+    # ÉTAPE 3 : Affichage des résultats dans le terminal
     print("\n --- RÉSULTATS ---")
     print(f"  Dépense mensuelle moyenne : {moyenne['moyenne']:.2f}€")
     print(f"  Épargne accumulée : {epargne['epargne_accumulee']:.2f}€ / {OBJECTIF_EPARGNE:.0f}€")
@@ -69,7 +71,7 @@ if __name__ == "__main__":
         else:
             print(f"    !!  {cat}: dépassement de {vals['ecart']:.2f}€")
  
-    # 월급/잔액 출력 (있을 때만)
+    # Affichage du salaire et du solde (si disponibles)
     if moyenne.get('a_un_salaire'):
         print("\n  Salaire et solde mensuel :")
         for mois, vals in moyenne['par_mois'].items():
@@ -78,7 +80,7 @@ if __name__ == "__main__":
                       f"- dépenses {vals['depenses']:.2f}€ "
                       f"= solde {vals['solde']:.2f}€")
  
-    # 4단계: 그래프 생성
+    # ÉTAPE 4 : Génération des graphiques
     print("\n Création des graphiques...")
     vis = Visualiseur()
  
@@ -96,7 +98,7 @@ if __name__ == "__main__":
         epargne, f"Progression vers l'objectif ({OBJECTIF_EPARGNE:.0f}€)"
     )
  
-    # 5단계: PDF 생성
+    # ÉTAPE 5 : Génération du rapport PDF
     print("\n Génération du rapport PDF...")
     gen = GenerateurPDF(CHEMIN_PDF)
     gen.generer(
@@ -106,5 +108,5 @@ if __name__ == "__main__":
     )
  
     print("\n" + "=" * 55)
-    print(f"   Terminé ! Rapport : {CHEMIN_PDF}")
+    print(f"   ✅ Terminé ! Le rapport a été généré sous : {CHEMIN_PDF}")
     print("=" * 55)
