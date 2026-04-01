@@ -1,3 +1,5 @@
+# --- DICTIONNAIRE DE TRADUCTION DES MOIS ---
+# On l'utilise pour transformer le chiffre du mois (1, 2...) en texte ("Janvier"...)
 MOIS_FR = {
     1: 'Janvier', 2: 'Février',  3: 'Mars',     4: 'Avril',
     5: 'Mai',     6: 'Juin',     7: 'Juillet',   8: 'Août',
@@ -30,6 +32,7 @@ class AnalyseurDepenses:
         total_depenses = par_categorie.sum()
 
         resultats = {}
+        # On boucle sur chaque catégorie pour calculer son poids (pourcentage)
         for categorie, montant in par_categorie.items():
             resultats[categorie] = {
                 'total': round(montant, 2),
@@ -54,6 +57,7 @@ class AnalyseurDepenses:
         for (annee, mois), groupe in self.depenses.groupby(['Année', 'Mois']):
             cle = f"{MOIS_FR[mois]} {annee}"
 
+            # Dans ce mois précis, on calcule le total par catégorie
             par_categorie = groupe.groupby('Catégorie')['Montant_abs'].sum()
             total_du_mois = par_categorie.sum()
 
@@ -93,6 +97,7 @@ class AnalyseurDepenses:
             par_mois_salaires = salaires.groupby(['Année', 'Mois'])['Montant'].sum()
 
         mois_dict = {}
+        # On parcourt chaque mois pour construire le bilan (Dépenses vs Salaire)
         for (annee, mois), depense in par_mois_depenses.items():
             cle = f"{MOIS_FR[mois]} {annee}"
 
@@ -102,7 +107,7 @@ class AnalyseurDepenses:
                 salaire = par_mois_salaires.get((annee, mois), None)
                 if salaire is not None:
                     salaire = round(float(salaire), 2)
-                    solde   = round(salaire - depense, 2)
+                    solde   = round(salaire - depense, 2) # Le solde = l'argent qui reste
 
             mois_dict[cle] = {
                 'depenses': round(depense, 2),
@@ -139,7 +144,6 @@ class AnalyseurDepenses:
             # Écart positif = on a dépensé moins que prévu = économie
             # Écart négatif = on a dépensé plus que prévu = dépassement
             ecart = budget_total - depense_totale
-
             if ecart >= 0:
                 statut = 'économie'
                 total_economise += ecart
@@ -161,10 +165,10 @@ class AnalyseurDepenses:
         """
         Calcule le montant total épargné et le taux d'atteinte de l'objectif.
         """
-        # Le _ signifie qu'on ignore le premier résultat retourné par comparer_budget
+        # On récupère le montant total économisé grâce à la fonction précédente
         _, total_economise = self.comparer_budget(budgets)
 
-        # On s'assure que le restant ne peut pas être négatif (si objectif déjà atteint)
+        # Calcul du reste à épargner
         restant = max(0, objectif_epargne - total_economise)
 
         # On plafonne à 100% même si on a dépassé l'objectif
@@ -182,6 +186,7 @@ class AnalyseurDepenses:
         Retourne les données de tendances de dépenses par catégorie et par mois.
         Retourne : DataFrame (Catégorie, Année, Mois, Montant_abs)
         """
+        # Transformation du résultat en un tableau simple
         tendances = self.depenses.groupby(
             ['Catégorie', 'Année', 'Mois']
         )['Montant_abs'].sum().reset_index()

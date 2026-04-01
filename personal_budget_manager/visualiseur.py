@@ -7,6 +7,7 @@ import io
 
 from analyseur import MOIS_FR
 
+# Couleurs pour chaque catégorie (pour les graphiques)
 COULEURS_CATEGORIES = {
     'Transport':          '#3498db',
     'Alimentation':       '#2ecc71',
@@ -25,6 +26,7 @@ class Visualiseur:
     """
 
     def __init__(self):
+        # Configuration globale du style des graphiques
         plt.rcParams['font.family']      = 'DejaVu Sans'
         plt.rcParams['figure.facecolor'] = '#f8f9fa'
 
@@ -54,12 +56,13 @@ class Visualiseur:
         nb_cols = min(3, nb_mois)
         nb_rows = math.ceil(nb_mois / nb_cols)
 
+        # Taille des graphiques : 6x6
         fig, axes = plt.subplots(
             nb_rows, nb_cols,
             figsize=(6 * nb_cols, 6 * nb_rows)
         )
 
-        # Conversion en liste si un seul graphique pour itérer facilement
+        # Conversion en liste si un seul graphique (un seul mois) pour itérer facilement
         if nb_mois == 1:
             axes = [[axes]]
         elif nb_rows == 1:
@@ -76,12 +79,14 @@ class Visualiseur:
             valeurs   = [v['total'] for v in categories.values()]
             couleurs  = [COULEURS_CATEGORIES.get(cat, '#95a5a6') for cat in labels]
 
+            # Dessin du camembert (pie chart)
             wedges, texts, autotexts = ax.pie(
                 valeurs, labels=None, autopct='%1.1f%%',
                 colors=couleurs, startangle=140,
                 wedgeprops={'edgecolor': 'white', 'linewidth': 1.5},
                 pctdistance=0.80
             )
+            # Mise en forme du texte du pourcentage à l'intérieur des parts
             for autotext in autotexts:
                 autotext.set_fontsize(8)
                 autotext.set_fontweight('bold')
@@ -91,12 +96,12 @@ class Visualiseur:
             ax.set_aspect('equal')  
             ax.set_title(mois, fontsize=13, fontweight='bold', color='#2c3e50', pad=2)
 
-            # Affichage du montant total dépensé
+            # Affichage du montant total dépensé sous chaque camembert
             total = sum(valeurs)
             ax.text(0, -1.2, f"Total : {total:.2f}€",
                     ha='center', fontsize=11, color='#7f8c8d')
 
-        # La légende n'est affichée qu'une fois en bas
+        # Création d'une légende globale en bas de l'image
         if mois_liste:
             last_categories = mois_liste[-1][1]
             labels_leg  = list(last_categories.keys())
@@ -130,6 +135,7 @@ class Visualiseur:
         fig, ax = plt.subplots(figsize=(10, 5))
         ax.set_facecolor('#f0f0f0')
 
+        # On dessine les deux barres décalées de 0.2 pour qu'elles soient côte à côte
         bars1 = ax.bar([i - 0.2 for i in x], budgets,  0.35,
                        label='Budget',           color='#3498db', alpha=0.85, edgecolor='white')
         bars2 = ax.bar([i + 0.2 for i in x], depenses, 0.35,
@@ -145,6 +151,7 @@ class Visualiseur:
                     f'{bar.get_height():.0f}€', ha='center', va='bottom',
                     fontsize=8, color='#e74c3c', fontweight='bold')
 
+        # Configuration des axes (noms des catégories, légendes)
         ax.set_xticks(list(x))
         ax.set_xticklabels(categories, rotation=15, ha='right', fontsize=9)
         ax.set_ylabel('Montant (€)', fontsize=10)
@@ -167,6 +174,7 @@ class Visualiseur:
             data_cat = tendances[tendances['Catégorie'] == categorie].copy()
             data_cat = data_cat.sort_values(['Année', 'Mois'])
 
+            # Préparation des étiquettes de l'axe X (ex: "Jan 2024")
             labels_x = [
                 f"{MOIS_FR[row['Mois']][:3]}\n{row['Année']}"
                 for _, row in data_cat.iterrows()
@@ -174,6 +182,7 @@ class Visualiseur:
             x       = range(len(labels_x))
             couleur = COULEURS_CATEGORIES.get(categorie, '#95a5a6')
 
+            # Dessin de la courbe avec des petits ronds (markers) sur les points
             ax.plot(list(x), data_cat['Montant_abs'].values,
                     marker='o', label=categorie,
                     color=couleur, linewidth=2.2,
