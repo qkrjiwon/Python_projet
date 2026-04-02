@@ -6,14 +6,8 @@ MOIS_FR = {
     9: 'Septembre', 10: 'Octobre', 11: 'Novembre', 12: 'Décembre'
 }
 
+# Classe pour analyser les données de dépenses.
 class AnalyseurDepenses:
-    """
-    Classe pour analyser les données de dépenses.
-
-    Utilisation :
-        analyseur = AnalyseurDepenses(donnees)
-        categories = analyseur.analyser_categories()
-    """
 
     def __init__(self, donnees):
         # On garde uniquement les lignes avec un montant négatif (= dépenses)
@@ -21,11 +15,11 @@ class AnalyseurDepenses:
         # On garde uniquement les lignes avec un montant positif (= revenus)
         self.revenus  = donnees[donnees['Montant'] > 0].copy()
 
+    # Calcul le total et le pourcentage des dépenses par catégorie (Total sur toute la période)
+    # Retourne : {'Transport': {'total': 250.0, 'pourcentage': 15.5}, ...}
+
     def analyser_categories(self):
-        """
-        Calcule le total et le pourcentage des dépenses par catégorie. (Total sur toute la période)
-        Retourne : {'Transport': {'total': 250.0, 'pourcentage': 15.5}, ...}
-        """
+
         # Regroupe toutes les dépenses par catégorie et additionne les montants
         par_categorie  = self.depenses.groupby('Catégorie')['Montant_abs'].sum()
         total_depenses = par_categorie.sum()
@@ -38,18 +32,12 @@ class AnalyseurDepenses:
                 'pourcentage': round((montant / total_depenses) * 100, 1)
             }
         return resultats
-
+    
+    # Calcule les proportions des catégories pour chaque mois.
+    # Utile pour générer des graphiques camembert mensuels.
+    # Retourne : {'Janvier 2024': {'Transport': {'total': 131, 'pourcentage': 9.6}, ...},...}
     def analyser_categories_par_mois(self):
-        """
-        Calcule les proportions des catégories pour chaque mois.
-        Utile pour générer des graphiques camembert mensuels.
 
-        Retourne : {
-            'Janvier 2024': {'Transport': {'total': 131, 'pourcentage': 9.6}, ...},
-            'Février 2024': {...},
-            ...
-        }
-        """
         resultats_par_mois = {}
 
         # Regroupe par année et mois pour traiter chaque mois séparément
@@ -68,11 +56,10 @@ class AnalyseurDepenses:
                 }
 
         return resultats_par_mois
-
+    
+    # Calcule le total mensuel, la moyenne globale et le solde si un salaire est présent.
     def calculer_moyenne_mensuelle(self):
         """
-        Calcule le total mensuel, la moyenne globale et le solde si un salaire est présent.
-
         Retourne : {
             'moyenne': 1250.50,
             'a_un_salaire': True,
@@ -120,12 +107,12 @@ class AnalyseurDepenses:
             'par_mois':     mois_dict,
             'a_un_salaire': a_un_salaire
         }
+    
+    # Compare les dépenses réelles avec le budget défini.
+    # Retourne : (dictionnaire de résultats, nombre total_economise)
 
     def comparer_budget(self, budgets):
-        """
-        Compare les dépenses réelles avec le budget défini.
-        Retourne : (dictionnaire de résultats, nombre total_economise)
-        """
+
         par_categorie = self.depenses.groupby('Catégorie')['Montant_abs'].sum()
 
         # Compte le nombre de mois distincts dans les données
@@ -159,11 +146,10 @@ class AnalyseurDepenses:
             }
 
         return resultats, round(total_economise, 2)
-
+    
+    # Calcul du montant total épargné et du taux d'atteinte de l'objectif
     def calculer_epargne(self, budgets, objectif_epargne):
-        """
-        Calcule le montant total épargné et le taux d'atteinte de l'objectif.
-        """
+
         # On récupère le montant total économisé grâce à la fonction précédente
         _, total_economise = self.comparer_budget(budgets)
 
@@ -179,12 +165,11 @@ class AnalyseurDepenses:
             'restant':             restant,
             'pourcentage_atteint': pourcentage_atteint
         }
-
+    
+    # Retourne les données de tendances de dépenses par catégorie et par mois.
+    # Retourne : DataFrame (Catégorie, Année, Mois, Montant_abs)
     def analyser_tendances(self):
-        """
-        Retourne les données de tendances de dépenses par catégorie et par mois.
-        Retourne : DataFrame (Catégorie, Année, Mois, Montant_abs)
-        """
+
         # Transformation du résultat en un tableau simple
         tendances = self.depenses.groupby(
             ['Catégorie', 'Année', 'Mois']

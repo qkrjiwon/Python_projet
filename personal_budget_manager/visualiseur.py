@@ -35,17 +35,15 @@ class Visualiseur:
         buf.seek(0)
         plt.close()
         return buf
-
+    
+    # Affiche un camembert par mois côte à côte dans une seule image.
+    # Retourne : image (BytesIO)
     def graphique_camembert_par_mois(self, categories_par_mois,
                                       titre="Répartition des dépenses par mois"):
         """
-        Affiche un camembert par mois côte à côte dans une seule image.
-
         Paramètres :
             categories_par_mois = résultat de analyser_categories_par_mois()
             titre = titre global
-
-        Retourne : image (BytesIO)
         """
         nb_mois = len(categories_par_mois)
 
@@ -120,9 +118,9 @@ class Visualiseur:
 
         plt.tight_layout()
         return self._sauvegarder()
-
+    
+    # Graphique à barres comparant le budget et les dépenses réelles
     def graphique_barres_budget(self, comparaison, titre="Budget vs Dépenses réelles"):
-        """Graphique à barres comparant le budget et les dépenses réelles."""
         categories = list(comparaison.keys())
         budgets    = [v['budget_total']   for v in comparaison.values()]
         depenses   = [v['depense_totale'] for v in comparaison.values()]
@@ -160,9 +158,9 @@ class Visualiseur:
 
         plt.tight_layout()
         return self._sauvegarder()
-
+    
+    # Graphique linéaire montrant l'évolution mensuelle par catégorie
     def graphique_tendances(self, tendances, titre="Tendances des dépenses par catégorie"):
-        """Graphique linéaire montrant l'évolution mensuelle par catégorie."""
         fig, ax = plt.subplots(figsize=(11, 5))
         ax.set_facecolor('#f0f0f0')
 
@@ -198,9 +196,9 @@ class Visualiseur:
 
         plt.tight_layout()
         return self._sauvegarder()
-
+    
+    # Barre horizontale montrant le taux de réussite de l'objectif d'épargne.
     def graphique_epargne(self, epargne, titre="Progression de l'épargne"):
-        """Barre horizontale montrant le taux de réussite de l'objectif d'épargne."""
         fig, ax = plt.subplots(figsize=(8, 2))
 
         pourcentage = epargne['pourcentage_atteint']
