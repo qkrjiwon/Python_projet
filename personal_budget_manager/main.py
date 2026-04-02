@@ -73,7 +73,7 @@ if __name__ == "__main__":
             print(f"    !!  {cat}: dépassement de {vals['ecart']:.2f}€")
  
     # Affichage du salaire et du solde (si disponibles)
-    if moyenne.get('a_un_salaire'):
+    if moyenne.get('a_un_revenu'):
         print("\n  Salaire et solde mensuel :")
         for mois, vals in moyenne['par_mois'].items():
             if vals['salaire']:

@@ -16,8 +16,8 @@ CATEGORIES = {
     'Santé': ['PHARMACIE', 'MEDECIN', 'DOCTEUR', 'HOPITAL', 'DENTISTE', 'MUTUELLE'],
 }
 
-# Liste des mots-clés permettant d'identifier un virement de salaire
-SALAIRE = ['SALAIRE', 'VIREMENT SALAIRE', 'PAIE', 'TRAITEMENT']
+# Liste des mots-clés permettant d'identifier un revenu (salaire, virement, aide, etc.)
+REVENU = ['SALAIRE', 'VIREMENT', 'PAIE', 'TRAITEMENT', 'AIDE', 'REMBOURSEMENT AMI']
 
 #Classe chargée de lire et préparer les données d'un fichier CSV bancaire.
 class LecteurCSV:
@@ -38,12 +38,12 @@ class LecteurCSV:
                     return categorie
         return 'Autre'
     
-    # Vérifie si une transaction correspond à un virement de salaire.
-    # Retourne : True si c'est un salaire, False sinon.
-    def _est_salaire(self, libelle: str) -> bool:
+    # Vérifie si une transaction correspond à un revenu
+    # Retourne : True si c'est un revenu, False sinon.
+    def _est_revenu(self, libelle: str) -> bool:
 
         libelle_upper = libelle.upper()
-        for mot in SALAIRE:
+        for mot in REVENU:
             if mot.upper() in libelle_upper:
                 return True
         return False
@@ -102,10 +102,10 @@ class LecteurCSV:
                     axis=1 # on applique la fonction ligne par ligne
                 )
 
-            # Ajout d'une colonne indiquant si la transaction est un salaire (True/False)
+            # Ajout d'une colonne indiquant si la transaction est un revenu (True/False)
             # Ici, on ne vérifie que les revenus
-            df['est_salaire'] = df.apply(
-                lambda row: self._est_salaire(str(row[colonne_libelle]))
+            df['est_revenu'] = df.apply(
+                lambda row: self._est_revenu(str(row[colonne_libelle]))
                 if row['Montant'] > 0 else False,
                 axis=1 
             )

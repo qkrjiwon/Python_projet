@@ -11,12 +11,9 @@ from reportlab.lib.enums import TA_CENTER
 class GenerateurPDF:
 
     def __init__(self, chemin_sortie="rapport_budget.pdf"):
-         # Chemin de sortie du fichier PDF
-        self.chemin_sortie = chemin_sortie
-        # Styles par défaut fournis par reportlab
-        self.styles        = getSampleStyleSheet()
-        # Création des styles personnalisés
-        self._creer_styles()
+        self.chemin_sortie = chemin_sortie # Chemin de sortie du fichier PDF
+        self.styles = getSampleStyleSheet() # Styles par défaut fournis par reportlab
+        self._creer_styles() # Création des styles personnalisés
     
     # Crée et configure les styles personnalisés utilisés dans le PDF.
     def _creer_styles(self):
@@ -32,8 +29,7 @@ class GenerateurPDF:
         
         """
         
-         # Style du titre principal (grand, centré, en gras)
-        self.style_titre = ParagraphStyle(
+        self.style_titre = ParagraphStyle(  # Style du titre principal (grand, centré, en gras)
             'MonTitre', parent=self.styles['Title'],
             fontSize=22, textColor=colors.HexColor('#2c3e50'),
             spaceAfter=6, alignment=TA_CENTER, fontName='Helvetica-Bold'
@@ -155,7 +151,7 @@ class GenerateurPDF:
         ))
 
         # Récapitulatif des dépenses dans le tableau avec le solde restant
-        a_salaire = moyenne_mensuelle.get('a_un_salaire', False)
+        a_salaire = moyenne_mensuelle.get('a_un_revenu', False)
          # Création du tableau avec 4 colonnes (mois, dépenses, salaire, solde)
         mois_data = [['Mois', 'Dépenses', 'Salaire', 'Solde restant']]
 

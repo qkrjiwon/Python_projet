@@ -62,7 +62,7 @@ class AnalyseurDepenses:
         """
         Retourne : {
             'moyenne': 1250.50,
-            'a_un_salaire': True,
+            'a_un_revenu': True,
             'par_mois': {
                 'Janvier 2024': {
                     'depenses': 1100.0,
@@ -75,11 +75,18 @@ class AnalyseurDepenses:
         # Calcule le total des dépenses pour chaque mois
         par_mois_depenses = self.depenses.groupby(['Année', 'Mois'])['Montant_abs'].sum()
 
-        # Vérification de la présence d'un salaire
-        a_un_salaire = self.revenus['est_salaire'].any() if 'est_salaire' in self.revenus.columns else False
 
-        if a_un_salaire:
-            salaires = self.revenus[self.revenus['est_salaire']]
+
+        # Vérification de la présence d'un salaire
+        col_revenu = None
+        for nom in ['est_revenu', 'est_renenu']:
+            if nom in self.revenus.columns:
+                col_revenu = nom
+                break
+        a_un_revenu = self.revenus['est_revenu'].any() if 'est_revenu' in self.revenus.columns else False
+
+        if a_un_revenu:
+            salaires = self.revenus[self.revenus[col_revenu] == True]
             par_mois_salaires = salaires.groupby(['Année', 'Mois'])['Montant'].sum()
 
         mois_dict = {}
@@ -89,7 +96,7 @@ class AnalyseurDepenses:
 
             salaire = None
             solde   = None
-            if a_un_salaire:
+            if a_un_revenu:
                 salaire = par_mois_salaires.get((annee, mois), None)
                 if salaire is not None:
                     salaire = round(float(salaire), 2)
@@ -105,7 +112,7 @@ class AnalyseurDepenses:
         return {
             'moyenne':      moyenne,
             'par_mois':     mois_dict,
-            'a_un_salaire': a_un_salaire
+            'a_un_revenu': a_un_revenu
         }
     
     # Compare les dépenses réelles avec le budget défini.
