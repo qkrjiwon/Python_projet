@@ -16,7 +16,6 @@ pip install -r requirements.txt
 ### 2. Extensions VS Code
 En ouvrant ce projet dans VS Code, une notification s'affiche automatiquement pour installer les extensions recommandées.
 Liste des extensions :
-- **Python** — indispensable pour le développement Python
 - **Pylance** — autocomplétion Python
 - **Rainbow CSV** — affiche les fichiers CSV avec des couleurs
 - **vscode-pdf** — ouvre les PDF directement dans VS Code
@@ -42,8 +41,7 @@ personal_budget_manager/
 ├── generateur.py        ← Génération du rapport PDF
 ├── transactions.csv     ← Fichier des transactions bancaires
 ├── requirements.txt     ← Liste des bibliothèques Python requises
-└── .vscode/
-    └── extensions.json  ← Extensions VS Code recommandées
+
 ```
 
 ---
