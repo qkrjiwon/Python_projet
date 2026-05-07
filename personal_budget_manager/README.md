@@ -19,6 +19,7 @@ Liste des extensions :
 - **Pylance** — autocomplétion Python
 - **Rainbow CSV** — affiche les fichiers CSV avec des couleurs
 - **vscode-pdf** — ouvre les PDF directement dans VS Code
+
 ---
 
 ## Lancement du programme
